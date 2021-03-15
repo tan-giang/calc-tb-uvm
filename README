@@ -8,7 +8,37 @@
 
 Directory Hierarchy:
 ===================
-/Design             Design modules
-/env                Testbench components
-/Tests              Testcases
-/Makefiles          Makefiles for Direct Programming Interface (DPI) options
+/Design               Design modules
+/env                  Testbench components
+/Tests                Testcases
+/Makefiles            Makefiles for Direct Programming Interface (DPI) options
+
+Testbench Descriptions:
+===================
+/env/cal_if.sv              Define interface between DUT and testbench environment.
+                            It contains signal ports for sending/receiving signals to/from DUT, clocking block for active clock edge
+/env/transaction.sv         Define transaction for environment including basic attributes like data and operators for calculator;
+                            and methods for creating, copying and comparing transactions.
+/env/sequence.sv            Define sequence for transaction randomization. 
+/env/driver.sv              Define driver for sending signals to DUT via interface. Driver requests randomized transactions from sequence,
+                            and unpacks transactions into signals to DUT.
+/env/monitor.sv             Define monitor for scanning signals from DUT.
+                              In active mode of agent, monitor watchs input ports of DUT to record singals coming into DUT, and pack signals
+                              to transactions and send transactions to components in environment for other functions as functional coverages.
+                              In passive mode of agent, monitor watchs output forts of DUT to record responses of DUT. Scannced signals are 
+                              packed into transactions and send to scoreboard to check functionalities of the design.
+/env/agent.sv               Define and connect driver, monitor and sequencer in environment. A sequencer is a container for seuquence of transactions.
+                              In active mode, driver and sequencer are initialized and connected via seq_item_port and seq_item_export according to TLM 2.0.
+                              An active monitor is defined to monitor transactions go into DUT.
+                              In passive mode, an agent only contains monitors to scan signals from DUT. 
+/env/reference.sv           Define a reference model for testbench. It takes transactions from active agent, which are sent from active monitor, and 
+                            anticipate results according to design functionalities. The results go to scoreboard for comparing with DUT results
+/env/scoreboard.sv          Define the reference model and FIFO to contain results from the reference and DUT, build TLM connections between the active monitor
+                            and the reference; the passive monitor with FIFO; the reference and the FIFO. Make comparisons between results of DUT and
+                            the reference.
+/env/environment.sv         Define the scoreboard, active and passive agents, connect them together following TLM connection rules.
+/env/cal_testbench.sv       Define testbench module that includes initializing DUT, clock signal, creating and registering an interface with uvm factory, and
+                            run tests.
+/Test/test1.sv              Define the whole environment and sequence, initialize them, and start sequence. Moreover, it overrides defined constraints in
+                            transaction class for specific test cases.
+
